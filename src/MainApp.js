@@ -5,8 +5,10 @@ import RackComponent from './RackComponent';
 import './App.css';
 import { Stage, Layer } from 'react-konva';
 import { jsPDF } from 'jspdf';
+import { useTranslation } from 'react-i18next';
 
 const MainApp = () => {
+  const { t } = useTranslation();
   const [cabinets, setCabinets] = useState({});
   const [positions, setPositions] = useState({});
   const [file, setFile] = useState(null);
@@ -15,7 +17,7 @@ const MainApp = () => {
   const [labelMargin, setLabelMargin] = useState(0);
   const [labelAlignment, setLabelAlignment] = useState('center');
   const [zoomLevel, setZoomLevel] = useState(1);
-  const [showWarning, setShowWarning] = useState(false); // Uyarı için state
+  const [showWarning, setShowWarning] = useState(false);
   const stageRef = useRef(null);
 
   useEffect(() => {
@@ -36,18 +38,17 @@ const MainApp = () => {
         const cabinetNames = Object.keys(data);
         if (cabinetNames.length > 20) {
           setShowWarning(true);
-          setTimeout(() => setShowWarning(false), 2000); // 2 saniye sonra kaybolur
+          setTimeout(() => setShowWarning(false), 2000);
         }
-        // Maksimum 20 kabin ile sınırlı
         const limitedCabinets = Object.fromEntries(cabinetNames.slice(0, 20).map(name => [name, data[name]]));
         setCabinets(limitedCabinets);
         setErrors(null);
 
-        const extraSpaceX = 180; // X ekseninde kabinler arası boşluk
-        const extraSpaceY = 600; // Y ekseninde satır arası boşluk (rack yüksekliği kadar)
+        const extraSpaceX = 180;
+        const extraSpaceY = 600;
         const initialPositions = Object.keys(limitedCabinets).reduce((acc, cabinet, i) => {
-          const row = Math.floor(i / 10); // Her 10 kabinde yeni satır
-          const col = i % 10; // Satırdaki pozisyon
+          const row = Math.floor(i / 10);
+          const col = i % 10;
           const xPosition = col * extraSpaceX;
           const yPosition = row * extraSpaceY;
           acc[cabinet] = { x: xPosition, y: yPosition };
@@ -78,7 +79,6 @@ const MainApp = () => {
   const handleGridChange = (e) => setGridSize(parseInt(e.target.value));
   const handleMarginChange = (e) => setLabelMargin(parseInt(e.target.value));
   const handleAlignmentChange = (e) => setLabelAlignment(e.target.value);
-
   const handleZoomIn = () => setZoomLevel(prev => Math.min(prev + 0.1, 2));
   const handleZoomOut = () => setZoomLevel(prev => Math.max(prev - 0.1, 0.5));
 
@@ -111,6 +111,10 @@ const MainApp = () => {
     pdf.save('rack-diagram.pdf');
   };
 
+  const cabinetCount = Object.keys(cabinets).length;
+  const rows = Math.ceil(cabinetCount / 10);
+  const canvasHeight = rows * 600 + 100;
+
   return (
     <div className="app-container">
       <div className="app-content">
@@ -120,75 +124,73 @@ const MainApp = () => {
           <div className="option">
             <label htmlFor="gridSize">Snap-to-Grid: </label>
             <select id="gridSize" value={gridSize} onChange={handleGridChange}>
-              <option value={0}>Izgara Yok</option>
+              <option value={0}>{t('no_grid')}</option>
               <option value={10}>10x10</option>
               <option value={20}>20x20</option>
             </select>
           </div>
           <div className="option">
-            <label htmlFor="labelMargin">Etiket Boşluğu: </label>
+            <label htmlFor="labelMargin">{t('label_margin')}: </label>
             <select id="labelMargin" value={labelMargin} onChange={handleMarginChange}>
-              <option value={0}>0px (Bitişik)</option>
+              <option value={0}>0px ({t('adjacent')})</option>
               <option value={5}>5px</option>
               <option value={10}>10px</option>
               <option value={15}>15px</option>
             </select>
           </div>
           <div className="option">
-            <label htmlFor="labelAlignment">Etiket Hizalama: </label>
+            <label htmlFor="labelAlignment">{t('label_alignment')}: </label>
             <select id="labelAlignment" value={labelAlignment} onChange={handleAlignmentChange}>
-              <option value="left">Sol</option>
-              <option value="center">Orta</option>
-              <option value="right">Sağ</option>
+              <option value="left">{t('left')}</option>
+              <option value="center">{t('center')}</option>
+              <option value="right">{t('right')}</option>
             </select>
           </div>
         </div>
         <div className="button-container">
           <Link to="/">
-            <button className="help-button">Nasıl Kullanılır?</button>
+            <button className="help-button">{t('how_to_use')}</button>
           </Link>
-          <button onClick={handleZoomIn}>Zoom In</button>
-          <button onClick={handleZoomOut}>Zoom Out</button>
-          <button onClick={exportToPNG}>PNG İndir</button>
-          <button onClick={exportToSVG}>SVG İndir</button>
-          <button onClick={exportToPDF}>PDF İndir</button>
+          <button onClick={handleZoomIn}>{t('zoom_in')}</button>
+          <button onClick={handleZoomOut}>{t('zoom_out')}</button>
+          <button onClick={exportToPNG}>{t('download_png')}</button>
+          <button onClick={exportToSVG}>{t('download_svg')}</button>
+          <button onClick={exportToPDF}>{t('download_pdf')}</button>
+          <Link to="/">
+            <button>{t('back_to_home')}</button>
+          </Link>
         </div>
-        <Stage
-          width={window.innerWidth}
-          height={window.innerHeight}
-          scaleX={zoomLevel}
-          scaleY={zoomLevel}
-          ref={stageRef}
-        >
-          <Layer>
-            {Object.entries(cabinets).map(([cabinet, data]) => (
-              <RackComponent
-                key={cabinet}
-                cabinet={cabinet}
-                data={data}
-                position={positions[cabinet]}
-                handleDragMove={(e) => handleDragMove(e, gridSize)}
-                handleDragEnd={handleDragEnd}
-                gridSize={gridSize}
-                labelMargin={labelMargin}
-                labelAlignment={labelAlignment}
-              />
-            ))}
-          </Layer>
-        </Stage>
+        <div className="canvas-container" style={{ overflow: 'auto', maxHeight: '100vh' }}>
+          <Stage
+            width={window.innerWidth}
+            height={canvasHeight}
+            scaleX={zoomLevel}
+            scaleY={zoomLevel}
+            ref={stageRef}
+          >
+            <Layer>
+              {Object.entries(cabinets).map(([cabinet, data]) => {
+                const position = positions[cabinet] || { x: 0, y: 0 };
+                return (
+                  <RackComponent
+                    key={cabinet}
+                    cabinet={cabinet}
+                    data={data}
+                    position={position}
+                    handleDragMove={(e) => handleDragMove(e, gridSize)}
+                    handleDragEnd={handleDragEnd}
+                    gridSize={gridSize}
+                    labelMargin={labelMargin}
+                    labelAlignment={labelAlignment}
+                  />
+                );
+              })}
+            </Layer>
+          </Stage>
+        </div>
         {showWarning && (
-          <div style={{
-            position: 'fixed',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            backgroundColor: 'rgba(255, 0, 0, 0.8)',
-            color: 'white',
-            padding: '20px',
-            borderRadius: '5px',
-            zIndex: 1000
-          }}>
-            20 kabinden fazlası çizilmez
+          <div className="warning-popup">
+            {t('max_cabinets_warning')}
           </div>
         )}
       </div>

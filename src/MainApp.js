@@ -14,11 +14,12 @@ const MainApp = () => {
   const [gridSize, setGridSize] = useState(10);
   const [labelMargin, setLabelMargin] = useState(0);
   const [labelAlignment, setLabelAlignment] = useState('center');
-  const [zoomLevel, setZoomLevel] = useState(1); // Zoom seviyesi (1 = varsayılan)
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [showWarning, setShowWarning] = useState(false); // Uyarı için state
   const stageRef = useRef(null);
 
   useEffect(() => {
-    window.scrollTo(0, 0); // Sayfayı yüklenince tepesine kaydır
+    window.scrollTo(0, 0);
   }, []);
 
   const uploadFile = async () => {
@@ -32,13 +33,24 @@ const MainApp = () => {
       if (data.errors) {
         setErrors(data.errors);
       } else {
-        setCabinets(data);
-        setErrors(null);
         const cabinetNames = Object.keys(data);
-        const extraSpace = 180;
-        const initialPositions = cabinetNames.reduce((acc, cabinet, i) => {
-          const xPosition = i * extraSpace;
-          acc[cabinet] = { x: xPosition, y: 0 };
+        if (cabinetNames.length > 20) {
+          setShowWarning(true);
+          setTimeout(() => setShowWarning(false), 2000); // 2 saniye sonra kaybolur
+        }
+        // Maksimum 20 kabin ile sınırlı
+        const limitedCabinets = Object.fromEntries(cabinetNames.slice(0, 20).map(name => [name, data[name]]));
+        setCabinets(limitedCabinets);
+        setErrors(null);
+
+        const extraSpaceX = 180; // X ekseninde kabinler arası boşluk
+        const extraSpaceY = 600; // Y ekseninde satır arası boşluk (rack yüksekliği kadar)
+        const initialPositions = Object.keys(limitedCabinets).reduce((acc, cabinet, i) => {
+          const row = Math.floor(i / 10); // Her 10 kabinde yeni satır
+          const col = i % 10; // Satırdaki pozisyon
+          const xPosition = col * extraSpaceX;
+          const yPosition = row * extraSpaceY;
+          acc[cabinet] = { x: xPosition, y: yPosition };
           return acc;
         }, {});
         setPositions(initialPositions);
@@ -67,13 +79,8 @@ const MainApp = () => {
   const handleMarginChange = (e) => setLabelMargin(parseInt(e.target.value));
   const handleAlignmentChange = (e) => setLabelAlignment(e.target.value);
 
-  const handleZoomIn = () => {
-    setZoomLevel(prev => Math.min(prev + 0.1, 2)); // Maksimum 2x zoom
-  };
-
-  const handleZoomOut = () => {
-    setZoomLevel(prev => Math.max(prev - 0.1, 0.5)); // Minimum 0.5x zoom
-  };
+  const handleZoomIn = () => setZoomLevel(prev => Math.min(prev + 0.1, 2));
+  const handleZoomOut = () => setZoomLevel(prev => Math.max(prev - 0.1, 0.5));
 
   const exportToPNG = () => {
     const dataURL = stageRef.current.toDataURL({ pixelRatio: 2 });
@@ -84,10 +91,7 @@ const MainApp = () => {
   };
 
   const exportToSVG = () => {
-    const svgData = stageRef.current.toDataURL({ 
-      mimeType: 'image/svg+xml', 
-      pixelRatio: 2,
-    });
+    const svgData = stageRef.current.toDataURL({ mimeType: 'image/svg+xml', pixelRatio: 2 });
     const blob = new Blob([svgData], { type: 'image/svg+xml' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -152,7 +156,7 @@ const MainApp = () => {
         <Stage
           width={window.innerWidth}
           height={window.innerHeight}
-          scaleX={zoomLevel} // Yakınlaştırma için scale
+          scaleX={zoomLevel}
           scaleY={zoomLevel}
           ref={stageRef}
         >
@@ -172,6 +176,21 @@ const MainApp = () => {
             ))}
           </Layer>
         </Stage>
+        {showWarning && (
+          <div style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            backgroundColor: 'rgba(255, 0, 0, 0.8)',
+            color: 'white',
+            padding: '20px',
+            borderRadius: '5px',
+            zIndex: 1000
+          }}>
+            20 kabinden fazlası çizilmez
+          </div>
+        )}
       </div>
     </div>
   );

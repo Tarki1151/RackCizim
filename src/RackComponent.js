@@ -19,18 +19,29 @@ const RackComponent = ({
   const [tooltip, setTooltip] = useState(null);
 
   let adjustedData = Array.isArray(data) && data.length > 0
-    ? data.map(item => {
-        const rackValue = String(item.Rack || '1');
-        let startU = parseInt(rackValue.match(/\d+/)?.[0] || 1);
-        const u = parseFloat(item.U) || 1;
+    ? data
+        .map(item => {
+          const rackStr = String(item.Rack || '').trim();
+          const uStr = String(item.U || '').trim().toUpperCase();
+          
+          // Rack ve U’yu sayıya çevir, geçersizse null yap
+          const startU = rackStr && rackStr.replace('.', '').match(/\d+/) ? parseInt(rackStr) : null;
+          const u = uStr === 'BLADE' || !uStr.replace('.', '').match(/\d+/) ? null : parseFloat(uStr);
 
-        if (startU === 0) startU = 1;
-        return { ...item, Rack: startU };
-      }).filter(item => item && item.Rack > 0 && item.Rack <= 50)
+          if (startU === 0) startU = 1;
+          return { ...item, Rack: startU, U: u };
+        })
+        .filter(item => 
+          item && 
+          item.Rack > 0 && 
+          item.Rack <= 50 && 
+          item.U > 0 && // U sıfır veya negatif olmasın
+          item.BrandModel
+        )
     : [];
 
   const maxU = adjustedData.length > 0
-    ? Math.max(...adjustedData.map(item => item.Rack + (parseFloat(item.U) || 1) - 1))
+    ? Math.max(...adjustedData.map(item => item.Rack + item.U - 1))
     : rackHeight;
 
   const isFullRack = maxU > rackHeight;
@@ -54,9 +65,9 @@ const RackComponent = ({
   };
 
   const formatProductName = (name, u) => {
-    const formattedName = (name || 'Bilinmeyen Model').toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+    const formattedName = name.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
     if (u === 1 && formattedName.length > 25) {
-      return formattedName.slice(0, 25) + '..'; // 1U için 25 karakter sınırı
+      return formattedName.slice(0, 25) + '..';
     }
     return formattedName;
   };
@@ -111,10 +122,10 @@ const RackComponent = ({
         </>
       ) : (
         adjustedData.map((item, index) => {
-          const rackValue = String(item.Rack);
-          const startU = parseInt(rackValue);
-          const u = parseFloat(item.U) || 1;
-          const color = (item.Face && item.Face.toLowerCase() === 'arka') ? 'orange' : 'lightblue';
+          const startU = item.Rack;
+          const u = item.U;
+          const faceValue = item.Face ? item.Face.toLowerCase() : '';
+          const color = (faceValue === 'arka' || faceValue === 'back') ? 'orange' : 'lightblue';
 
           const rectY = frameBottom - (startU - 1 + u) * uHeight;
           const rectHeight = u * uHeight;
@@ -147,27 +158,9 @@ const RackComponent = ({
       )}
       {tooltip && (
         <Group x={tooltip.x} y={tooltip.y}>
-          <Rect
-            width={150}
-            height={60}
-            fill="rgba(0, 0, 0, 0.8)"
-            cornerRadius={5}
-          />
-          <Text
-            text={`Owner: ${tooltip.owner}`}
-            fontSize={10}
-            fill="white"
-            padding={5}
-            width={140}
-          />
-          <Text
-            text={`Serial: ${tooltip.serial}`}
-            fontSize={12}
-            fill="white"
-            padding={5}
-            y={20}
-            width={140}
-          />
+          <Rect width={150} height={60} fill="rgba(0, 0, 0, 0.8)" cornerRadius={5} />
+          <Text text={`Owner: ${tooltip.owner}`} fontSize={10} fill="white" padding={5} width={140} />
+          <Text text={`Serial: ${tooltip.serial}`} fontSize={12} fill="white" padding={5} y={20} width={140} />
         </Group>
       )}
     </Group>

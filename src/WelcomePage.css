@@ -1,78 +1,96 @@
 .welcome-container {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    background-image: url('/public/bg.jpg'); /* Çalışan yol */
-    background-size: cover;
-    background-position: center;
-    color: #333;
-    text-align: center;
-    font-family: Arial, sans-serif;
-  }
-  
-  .content-container {
-    background-color: rgba(255, 255, 255, 0.8); /* %80 şeffaf beyaz */
-    padding: 20px;
-    border-radius: 10px;
-    max-width: 900px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  }
-  
-  .company-logo {
-    width: 250px; /* Logo genişliği 250px olarak güncellendi */
-    margin-bottom: 20px;
-  }
-  
-  h1 {
-    font-size: 1.8em;
-    margin-bottom: 20px;
-  }
-  
-  h2 {
-    font-size: 1.4em;
-    margin-top: 20px;
-  }
-  
-  p, li {
-    font-size: 1.2em;
-    line-height: 1.5;
-  }
-  
-  ol {
-    text-align: left;
-    max-width: 800px;
-    margin: 20px 0;
-  }
-  
-  ul {
-    text-align: left;
-    max-width: 800px;
-    margin-bottom: 20px;
-  }
-  
-  a {
-    color: #007bff;
-    text-decoration: none;
-  }
-  
-  a:hover {
-    text-decoration: underline;
-  }
-  
-  .start-button {
-    padding: 10px 20px;
-    font-size: 1.2em;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-top: 20px;
-  }
-  
-  .start-button:hover {
-    background-color: #0056b3;
-  }
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background-image: url('/public/bg.jpg');
+  background-size: cover;
+  background-position: center;
+  color: #333;
+  text-align: center;
+  font-family: Arial, sans-serif;
+  position: relative; /* Absolute pozisyon için referans */
+}
+
+.content-container {
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 900px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.company-logo {
+  width: 250px;
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-size: 1.44em;
+  margin-bottom: 20px;
+}
+
+h2 {
+  font-size: 1.4em;
+  margin-top: 20px;
+}
+
+p, li {
+  font-size: 1.1em;
+  line-height: 1.5;
+}
+
+ol {
+  text-align: left;
+  max-width: 800px;
+  margin: 20px 0;
+}
+
+ul {
+  text-align: left;
+  max-width: 800px;
+  margin-bottom: 20px;
+}
+
+a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.start-button {
+  padding: 10px 20px;
+  font-size: 1.2em;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.start-button:hover {
+  background-color: #0056b3;
+}
+
+.language-button-top {
+  position: absolute;
+  top: 10px;
+  right: 10px; /* Sağ üst kenara taşıdık */
+  background-color: #007bff;
+  color: white;
+  padding: 7px 14px;
+  border: none;
+  border-radius: 3.5px;
+  cursor: pointer;
+  font-size: 11.2px;
+}
+
+.language-button-top:hover {
+  background-color: #0056b3;
+}

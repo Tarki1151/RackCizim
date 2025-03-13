@@ -1,6 +1,6 @@
 import React from 'react';
 
-const UploadComponent = ({ setFile, uploadFile, errors }) => {
+const UploadComponent = ({ setFile, uploadFile, errors, t }) => {
   return (
     <div className="upload-component">
       <input
@@ -8,7 +8,7 @@ const UploadComponent = ({ setFile, uploadFile, errors }) => {
         accept=".xlsx, .xls"
         onChange={(e) => setFile(e.target.files[0])}
       />
-      <button onClick={uploadFile}>Yükle ve İşle</button>
+      <button onClick={uploadFile}>{t.upload_button}</button>
       {errors && <div style={{ color: 'red' }}>{JSON.stringify(errors)}</div>}
     </div>
   );

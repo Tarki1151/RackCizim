@@ -1,17 +1,20 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import WelcomePage from './WelcomePage';
-import MainApp from './MainApp'; // Ana uygulamayı ayırıyoruz
+import MainApp from './MainApp';
 import './App.css';
+import { LanguageProvider } from './context/LanguageContext'; // LanguageProvider import et
 
 const App = () => {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<WelcomePage />} />
-        <Route path="/app" element={<MainApp />} />
-      </Routes>
-    </Router>
+    <LanguageProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<WelcomePage />} />
+          <Route path="/app" element={<MainApp />} />
+        </Routes>
+      </Router>
+    </LanguageProvider>
   );
 };
 

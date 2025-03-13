@@ -9,13 +9,18 @@ const RackComponent = ({
   handleDragEnd, 
   gridSize, 
   labelMargin, 
-  labelAlignment 
+  labelAlignment,
+  productColors,
+  onProductSelect
 }) => {
   const rackHeight = 42;
-  const frameTop = 24;
-  const frameBottom = 576;
-  const innerHeight = frameBottom - frameTop;
-  const uHeight = innerHeight / rackHeight;
+  const frameTop = 19.2; // Sabit küçültülmüş değer
+  const frameBottom = 480; // Sabit küçültülmüş değer
+  const innerHeight = frameBottom - frameTop; // 460.8
+  const uHeight = innerHeight / rackHeight; // 460.8 / 42 ≈ 10.973
+  const cabinetWidth = 144; // Sabit küçültülmüş genişlik
+  const productWidth = 112; // Sabit küçültülmüş genişlik
+  const productXOffset = 18; // Ürünlerin x pozisyonu, 16’dan 18’e kaydırıldı (2 piksel sağa)
   const [tooltip, setTooltip] = useState(null);
 
   let adjustedData = Array.isArray(data) && data.length > 0
@@ -23,21 +28,11 @@ const RackComponent = ({
         .map(item => {
           const rackStr = String(item.Rack || '').trim();
           const uStr = String(item.U || '').trim().toUpperCase();
-          
-          // Rack ve U’yu sayıya çevir, geçersizse null yap
-          const startU = rackStr && rackStr.replace('.', '').match(/\d+/) ? parseInt(rackStr) : null;
-          const u = uStr === 'BLADE' || !uStr.replace('.', '').match(/\d+/) ? null : parseFloat(uStr);
-
-          if (startU === 0) startU = 1;
+          const startU = rackStr && rackStr.match(/\d+/) ? parseInt(rackStr) : null;
+          const u = uStr === 'BLADE' || !uStr.match(/\d+/) ? null : parseFloat(uStr);
           return { ...item, Rack: startU, U: u };
         })
-        .filter(item => 
-          item && 
-          item.Rack > 0 && 
-          item.Rack <= 50 && 
-          item.U > 0 && // U sıfır veya negatif olmasın
-          item.BrandModel
-        )
+        .filter(item => item && item.Rack > 0 && item.Rack <= rackHeight && item.U > 0 && item.BrandModel)
     : [];
 
   const maxU = adjustedData.length > 0
@@ -72,6 +67,37 @@ const RackComponent = ({
     return formattedName;
   };
 
+  const handleProductClick = (e, index) => {
+    const stage = e.target.getStage();
+    const pointerPosition = stage.getPointerPosition();
+    onProductSelect(cabinet, index, pointerPosition.x, pointerPosition.y);
+  };
+
+  // Ürün pozisyonlarını dinamik olarak hesapla
+  const calculateProductY = (item, index, adjustedData) => {
+    const startU = item.Rack;
+    const u = Math.min(item.U, rackHeight - (startU - 1));
+    const previousItem = index > 0 ? adjustedData[index - 1] : null;
+
+    if (previousItem) {
+      const previousStartU = previousItem.Rack;
+      const previousU = Math.min(previousItem.U, rackHeight - (previousStartU - 1));
+      const previousEndU = previousStartU + previousU;
+
+      if (previousEndU === startU) {
+        // Bitişik ürünler: Boşluk yok
+        return frameBottom - (previousStartU - 1 + previousU) * uHeight - (u * uHeight);
+      } else {
+        // Boşluklu ürünler: Orijinal boşluk korunur
+        const originalGap = (startU - previousEndU) * uHeight;
+        return frameBottom - (previousStartU - 1 + previousU) * uHeight - originalGap - (u * uHeight);
+      }
+    } else {
+      // İlk ürün: 42U’dan yukarı doğru hizalı
+      return frameBottom - (startU - 1 + u) * uHeight;
+    }
+  };
+
   return (
     <Group
       x={position.x}
@@ -82,85 +108,99 @@ const RackComponent = ({
     >
       <Text
         text={cabinet}
-        width={180}
+        width={cabinetWidth}
         fontSize={16}
         align={labelAlignment}
         y={6 - labelMargin}
       />
-      <Rect x={0} y={frameTop} width={180} height={innerHeight} stroke="black" strokeWidth={2} fill="transparent" />
+      <Rect x={0} y={frameTop} width={cabinetWidth} height={innerHeight} stroke="black" strokeWidth={2} fill="transparent" />
       {Array.from({ length: rackHeight + 1 }, (_, i) => (
-        <Line key={`line-${i}`} points={[20, frameTop + i * uHeight, 160, frameTop + i * uHeight]} stroke="#ccc" strokeWidth={1} />
+        <Line key={`line-${i}`} points={[20, frameTop + i * uHeight, 124, frameTop + i * uHeight]} stroke="#ccc" strokeWidth={1} />
       ))}
       {Array.from({ length: rackHeight }, (_, i) => (
-        <Text key={`label-${i}`} x={5} y={frameTop + i * uHeight + uHeight / 2 - 6} text={String(rackHeight - i)} fontSize={10} fill="black" align="center" width={15} />
+        <Text key={`label-${i}`} x={5} y={frameTop + i * uHeight + (uHeight / 2) - 6} text={String(rackHeight - i)} fontSize={9} fill="black" align="center" width={15} />
       ))}
       {adjustedData.length === 0 ? (
-        <Text x={90} y={100} text="Veri Yok" fontSize={16} fill="black" align="center" />
-      ) : isFullRack ? (
-        <>
-          <Rect 
-            x={20} 
-            y={frameTop} 
-            width={140} 
-            height={innerHeight} 
-            fill="yellow" 
-            stroke="black" 
-            strokeWidth={1}
-            onMouseEnter={(e) => handleMouseEnter(e, adjustedData[0])}
-            onMouseLeave={handleMouseLeave}
-          />
-          <Text 
-            x={25} 
-            y={frameTop + innerHeight / 2 - 20} 
-            text={formatProductName(adjustedData[0]?.BrandModel, maxU)} 
-            fontSize={9} 
-            fill="black" 
-            align="center" 
-            width={130} 
-          />
-          <Text x={25} y={frameTop + innerHeight / 2} text={`42U’dan yüksek ${maxU}U`} fontSize={9} fill="black" align="center" width={130} />
-        </>
-      ) : (
-        adjustedData.map((item, index) => {
-          const startU = item.Rack;
-          const u = item.U;
-          const faceValue = item.Face ? item.Face.toLowerCase() : '';
-          const color = (faceValue === 'arka' || faceValue === 'back') ? 'orange' : 'lightblue';
+  <Text x={90} y={100} text="Veri Yok" fontSize={9} fill="black" align="center" />
+) : isFullRack ? (
+  <>
+    <Rect 
+      x={productXOffset} 
+      y={frameTop} 
+      width={productWidth} 
+      height={innerHeight} 
+      fill={(productColors[cabinet] && productColors[cabinet][0]) || 'lightblue'} // Dinamik renk
+      stroke="black" 
+      strokeWidth={1}
+      onMouseEnter={(e) => handleMouseEnter(e, adjustedData[0])}
+      onMouseLeave={handleMouseLeave}
+      onClick={(e) => handleProductClick(e, 0)} 
+      listening={true}
+    />
+    <Text 
+      x={productXOffset + 4} 
+      y={frameTop + innerHeight / 2 - 20} 
+      text={formatProductName(adjustedData[0]?.BrandModel, maxU)} 
+      fontSize={9} 
+      fill="black" 
+      align="center" 
+      width={104} 
+    />
+    <Text 
+      x={productXOffset + 4} 
+      y={frameTop + innerHeight / 2} 
+      text={`**42U’dan yüksek ${maxU}U**`} 
+      fontSize={9} 
+      fill="black" 
+      align="center" 
+      width={104}
+      bold={true}
+    />
+  </>
+) : (
+  adjustedData.sort((a, b) => b.Rack - a.Rack).map((item, index) => {
+    const startU = item.Rack;
+    const u = Math.min(item.U, rackHeight - (startU - 1));
+    const faceValue = item.Face ? item.Face.toLowerCase() : '';
+    const defaultColor = (faceValue === 'arka' || faceValue === 'back') ? 'orange' : 'lightblue';
+    const color = (productColors[cabinet] && productColors[cabinet][index]) || defaultColor;
+    const itemHeight = u * uHeight;
+    const adjustedY = calculateProductY(item, index, adjustedData);
 
-          const rectY = frameBottom - (startU - 1 + u) * uHeight;
-          const rectHeight = u * uHeight;
-
-          return (
-            <React.Fragment key={index}>
-              <Rect 
-                x={20} 
-                y={rectY} 
-                width={140} 
-                height={rectHeight} 
-                fill={color} 
-                stroke="black" 
-                strokeWidth={1}
-                onMouseEnter={(e) => handleMouseEnter(e, item)}
-                onMouseLeave={handleMouseLeave}
-              />
-              <Text 
-                x={20} 
-                y={rectY + rectHeight / 2 - 6} 
-                text={formatProductName(item.BrandModel, u)} 
-                fontSize={10} 
-                fill="black" 
-                align="center" 
-                width={140} 
-              />
-            </React.Fragment>
-          );
-        })
-      )}
+    return (
+      <React.Fragment key={index}>
+        <Rect 
+          x={productXOffset} 
+          y={adjustedY} 
+          width={productWidth} 
+          height={itemHeight} 
+          fill={color} 
+          stroke="black" 
+          strokeWidth={1}
+          onClick={(e) => handleProductClick(e, index)}
+          onMouseEnter={(e) => handleMouseEnter(e, item)}
+          onMouseLeave={handleMouseLeave}
+          listening={true}
+        />
+        <Text 
+          x={productXOffset} 
+          y={adjustedY + (itemHeight / 2) - 6} 
+          text={formatProductName(item.BrandModel, u)} 
+          fontSize={9} 
+          fill="black" 
+          align="center" 
+          width={productWidth} 
+          listening={false}
+        />
+      </React.Fragment>
+    );
+  })
+)}
       {tooltip && (
         <Group x={tooltip.x} y={tooltip.y}>
-          <Rect width={150} height={60} fill="rgba(0, 0, 0, 0.8)" cornerRadius={5} />
-          <Text text={`Owner: ${tooltip.owner}`} fontSize={10} fill="white" padding={5} width={140} />
-          <Text text={`Serial: ${tooltip.serial}`} fontSize={12} fill="white" padding={5} y={20} width={140} />
+          <Rect width={120} height={60} fill="rgba(0, 0, 0, 0.8)" cornerRadius={5} />
+          <Text text={`Owner: ${tooltip.owner}`} fontSize={10} fill="white" padding={5} width={112} />
+          <Text text={`Serial: ${tooltip.serial}`} fontSize={12} fill="white" padding={5} y={20} width={112} />
         </Group>
       )}
     </Group>

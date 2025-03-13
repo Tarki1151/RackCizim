@@ -4,18 +4,17 @@ const LanguageContext = createContext();
 
 export const LanguageProvider = ({ children }) => {
   const [language, setLanguage] = useState(() => {
-    // localStorage'dan dil tercihini oku, yoksa varsayılan 'tr'
     return localStorage.getItem('language') || 'tr';
   });
 
   useEffect(() => {
-    // Dil değiştiğinde localStorage'a kaydet
     localStorage.setItem('language', language);
   }, [language]);
 
   const translations = {
     tr: {
-      welcome_title: "Rack Diagram Web’e Hoş Geldiniz!",
+      welcome_title: "Rack Çizim/Yerleştirme Uygulaması’na Hoş Geldiniz!",
+      app_title: "Rack Çizim/Yerleştirme Uygulaması",
       welcome_description: "Bu uygulama, sistem odanızdaki kabinleri kolayca çizmenize ve yönetmenize olanak tanır. İşte nasıl kullanacağınız:",
       welcome_how_to_use: "Nasıl Kullanılır?",
       welcome_step_1: "Şablon Excel’i İndirin: Aşağıdaki bağlantıya tıklayarak şablon Excel dosyasını indirin:",
@@ -36,7 +35,6 @@ export const LanguageProvider = ({ children }) => {
       welcome_tip_2: "Rack ve U kolonları zorunlu; diğerleri isteğe bağlıdır.",
       welcome_tip_3: "Tooltip ile ürün detaylarını (Owner, Serial) görmek için fareyi ürünlerin üzerine getirin.",
       welcome_start_button: "Uygulamaya Başla",
-      app_title: "Rack Diagram Web",
       app_snap_to_grid: "Snap-to-Grid:",
       app_no_grid: "Izgara Yok",
       app_label_margin: "Etiket Boşluğu:",
@@ -54,10 +52,14 @@ export const LanguageProvider = ({ children }) => {
       app_export_png: "PNG İndir",
       app_export_svg: "SVG İndir",
       app_export_pdf: "PDF İndir",
-      upload_button: "Yükle ve İşle"
+      upload_button: "Yükle ve İşle",
+      max_cabinets_warning: "Maksimum kabin sayısına ulaşıldı (20)!",
+      back_to_home: "Ana Sayfaya Dön",
+      app_export_pptx: "PPTX İndir"
     },
     en: {
-      welcome_title: "Welcome to Rack Diagram Web!",
+      welcome_title: "Welcome to Rack Drawing/Placement Application!",
+      app_title: "Rack Drawing/Placement Application",
       welcome_description: "This application allows you to easily draw and manage cabinets in your server room. Here's how to use it:",
       welcome_how_to_use: "How to Use?",
       welcome_step_1: "Download the Template Excel: Click the link below to download the template Excel file:",
@@ -78,7 +80,6 @@ export const LanguageProvider = ({ children }) => {
       welcome_tip_2: "Rack and U columns are mandatory; others are optional.",
       welcome_tip_3: "Hover over the products to see details (Owner, Serial) with a tooltip.",
       welcome_start_button: "Start Application",
-      app_title: "Rack Diagram Web",
       app_snap_to_grid: "Snap-to-Grid:",
       app_no_grid: "No Grid",
       app_label_margin: "Label Margin:",
@@ -96,7 +97,10 @@ export const LanguageProvider = ({ children }) => {
       app_export_png: "Download PNG",
       app_export_svg: "Download SVG",
       app_export_pdf: "Download PDF",
-      upload_button: "Upload and Process"
+      upload_button: "Upload and Process",
+      max_cabinets_warning: "Maximum cabinet limit reached (20)!",
+      back_to_home: "Back to Home",
+      app_export_pptx: "Download PPTX"
     }
   };
 

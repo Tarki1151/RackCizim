@@ -3,15 +3,27 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-image: url('/public/bg.jpg'); /* Çalışan yol */
+  background-image: url('/public/bg.jpg');
   padding: 20px;
-  background-color: rgba(255, 255, 255, 0.7); /* %70 şeffaf beyaz */
+  background-color: rgba(255, 255, 255, 0.7);
 }
 
 .app-content {
   width: 100%;
   text-align: center;
-  background-color: rgba(255, 255, 255, 0.7); /* %70 şeffaf beyaz */
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
+.header-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.app-title {
+  color: white;
+  margin: 0 0 10px 0;
 }
 
 .options-container {
@@ -50,9 +62,9 @@
 
 .canvas-container {
   width: 100%;
-  overflow: auto; /* Kaydırma çubukları */
-  max-height: 100vh; /* Maksimum yükseklik ekran yüksekliği kadar */
-  background-color: rgba(255, 255, 255, 0.7); /* %70 şeffaf beyaz */
+  overflow: auto;
+  max-height: 100vh;
+  background-color: rgba(255, 255, 255, 0.7);
 }
 
 .warning-popup {
@@ -64,5 +76,22 @@
   color: white;
   padding: 20px;
   border-radius: 5px;
-  zIndex: 1000;
+  z-index: 1000;
+}
+
+.color-picker {
+  position: absolute;
+  padding: 5px;
+  border: 1px solid #ccc;
+  display: flex;
+  flex-wrap: wrap;
+  width: 160px;
+  background-color: white;
+  z-index: 1000;
+}
+
+.upload-component {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }

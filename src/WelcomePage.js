@@ -1,53 +1,54 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import './WelcomePage.css';
+import { useLanguage } from './context/LanguageContext';
 
 const WelcomePage = () => {
+  const { t, language, setLanguage } = useLanguage();
+
+  const toggleLanguage = () => {
+    setLanguage(language === 'tr' ? 'en' : 'tr');
+  };
+
   return (
     <div className="welcome-container">
+      <button onClick={toggleLanguage} className="language-button-top">
+        {language === 'tr' ? 'Switch to English' : 'Türkçe’ye Geç'}
+      </button>
       <img src="/logo.png" alt="Şirket Logosu" className="company-logo" />
       <div className="content-container">
-        <h1>Rack Diagram Web’e Hoş Geldiniz!</h1>
-        <p>Bu uygulama, sistem odanızdaki kabinleri kolayca çizmenize ve yönetmenize olanak tanır. İşte nasıl kullanacağınız:</p>
-        
-        <h2>Nasıl Kullanılır?</h2>
+        <h1>{t.welcome_title}</h1>
+        <p>{t.welcome_description}</p>
+        <h2>{t.welcome_how_to_use}</h2>
         <ol>
           <li>
-            <strong>Şablon Excel’i İndirin:</strong> Aşağıdaki bağlantıya tıklayarak şablon Excel dosyasını indirin: 
-            <a href="/templates/input_template.xlsx" download>Şablon Excel’i İndir</a>
+            <strong>{t.welcome_step_1}</strong>{' '}
+            <a href="/templates/input_template.xlsx" download>{t.welcome_download_template}</a>
           </li>
           <li>
-            <strong>Excel’i Doldurun:</strong> Her kabin için bir sayfa oluşturun (sayfa ismi kabin adı olacak). Her ürün için:
+            <strong>{t.welcome_step_2}</strong>
             <ul>
-              <li><strong>Rack:</strong> Ürünün başlangıç U pozisyonunu girin (örneğin, 1, 5, 10).</li>
-              <li><strong>U:</strong> Ürünün kapladığı toplam U miktarını yazın (örneğin, 1, 2, 4).</li>
-              <li><strong>BrandModel:</strong> Ürünün marka ve modelini girin (örneğin, “Dell Poweredge R740”).</li>
-              <li><strong>Face:</strong> Ürünün yönünü belirtin (örneğin, “Ön” veya “Arka”).</li>
-              <li><strong>Owner:</strong> Ürünün sahibini yazın (isteğe bağlı).</li>
-              <li><strong>Serial:</strong> Ürün seri numarasını girin (isteğe bağlı).</li>
+              <li><strong>Rack:</strong> {t.welcome_step_2_rack}</li>
+              <li><strong>U:</strong> {t.welcome_step_2_u}</li>
+              <li><strong>BrandModel:</strong> {t.welcome_step_2_brandmodel}</li>
+              <li><strong>Face:</strong> {t.welcome_step_2_face}</li>
+              <li><strong>Owner:</strong> {t.welcome_step_2_owner}</li>
+              <li><strong>Serial:</strong> {t.welcome_step_2_serial}</li>
             </ul>
-            <p><em>Not:</em> Boş bırakılan alanlar otomatik olarak “Bilinmeyen” olarak işlenir.</p>
+            <p><em>{t.welcome_step_2_note}</em></p>
           </li>
-          <li>
-            <strong>Dosyayı Yükleyin:</strong> Ana sayfada “Dosya Seç” ile Excel dosyanızı seçin ve “Yükle ve İşle” butonuna tıklayın.
-          </li>
-          <li>
-            <strong>Kabinleri Düzenleyin:</strong> Kabinler ekranda göründükten sonra fareyle sürükleyerek yerlerini ayarlayabilirsiniz. Snap-to-grid seçenekleriyle hizalamayı kolaylaştırın.
-          </li>
-          <li>
-            <strong>Çıktı Alın:</strong> Çiziminizi PNG, JPEG, SVG veya PDF formatında indirmek için ilgili butonlara tıklayın.
-          </li>
+          <li><strong>{t.welcome_step_3}</strong></li>
+          <li><strong>{t.welcome_step_4}</strong></li>
+          <li><strong>{t.welcome_step_5}</strong></li>
         </ol>
-
-        <h2>Önemli İpuçları</h2>
+        <h2>{t.welcome_tips}</h2>
         <ul>
-          <li>Excel’de her sayfa bir kabini temsil eder, sayfa adını kabin adı olarak kullanın (örneğin, “Kabin1”).</li>
-          <li>Rack ve U kolonları zorunlu; diğerleri isteğe bağlıdır.</li>
-          <li>Tooltip ile ürün detaylarını (Owner, Serial) görmek için fareyi ürünlerin üzerine getirin.</li>
+          <li>{t.welcome_tip_1}</li>
+          <li>{t.welcome_tip_2}</li>
+          <li>{t.welcome_tip_3}</li>
         </ul>
-
         <Link to="/app">
-          <button className="start-button">Uygulamaya Başla</button>
+          <button className="start-button">{t.welcome_start_button}</button>
         </Link>
       </div>
     </div>
